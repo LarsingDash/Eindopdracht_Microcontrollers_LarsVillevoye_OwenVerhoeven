@@ -9,6 +9,8 @@
 #ifndef DISPLAY_H_
 #define DISPLAY_H_
 
+#include <stdint-gcc.h>
+
 void displayInit(void);
 void displaySetPixel(uint8_t x, uint8_t y);
 void displayClrPixel(uint8_t x, uint8_t y);

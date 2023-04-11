@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <util/delay.h>
 #include <time.h>
+#include <avr/interrupt.h>
 
 //Initiations
 void init_board();
@@ -42,29 +43,29 @@ void set_guess(int num) {
 	if (is_ready_for_input) guess = num;
 }
 
+ISR(INT0_vect) {
+	set_guess(0);
+}
 ISR(INT1_vect) {
-	set_guess(1);
+	set_guess(0);
 }
 ISR(INT2_vect) {
-	set_guess(2);
+	set_guess(1);
 }
 ISR(INT3_vect) {
-	set_guess(3);
+	set_guess(2);
 }
 ISR(INT4_vect) {
-	set_guess(4);
+	set_guess(3);
 }
 ISR(INT5_vect) {
-	set_guess(5);
+	set_guess(4);
 }
 ISR(INT6_vect) {
-	set_guess(6);
+	set_guess(5);
 }
 ISR(INT7_vect) {
-	set_guess(7);
-}
-ISR(INT8_vect) {
-	set_guess(8);
+	set_guess(6);
 }
 
 
@@ -101,10 +102,12 @@ int main(void)
 			guess_counter, 
 			guess_counter == 1 ? "try" : "tries");
 		display_text(guess_text);
+		_delay_ms(10);
 		
 		//Display guess information for 1 sec
 		_delay_ms(1000);
 		lcd_clear();
+		_delay_ms(10);
 		
 		int seconds = completion_timer / 10;
 		int milli = completion_timer % 10;
@@ -160,6 +163,8 @@ void play_round() {
 			
 			//Stop once input is detected
 			if (guess != 0) {
+				if (guess_counter == 1) timer = 0;
+				
 				is_ready_for_input = false;
 				break;
 			}
@@ -186,17 +191,14 @@ void play_round() {
 }
 
 //Initiations
-void init_board() {
-	DDRA = 0x00;
-	PORTA = 0xFF;
-	
+void init_board() {	
 	//Interrupts
 	EICRA = 0b11111111;
 	EICRB = 0b11111111;
 	EIMSK = 0b11111111;
 	
 	//Timer
-	OCR1A = 31250 / 100;
+	OCR1A = 31250 / 10;
 	TCCR1A = 0b00000000;
 	TCCR1B = 0b00001100;
 	TIMSK |= (1<<4);
@@ -229,7 +231,7 @@ void init_lcd() {
 int random_number_generator() {
 	//srand(time(NULL));
 	int rand_num = rand();
-	return (rand_num % 8) + 1;
+	return (rand_num % 6) + 1;
 }
 
 //Matrix functions
